@@ -5,7 +5,6 @@ async function searchResults(keyword) {
   const listRegex = /<li class="clearfix">([\s\S]*?)(?=<\/li>)/g;
 
   try {
-    // const encodedKeyword = encodeURIComponent(keyword);
     const html = await fetch(`https://gimy.tv/search/-------------.html?wd=${keyword}&submit=`);
     // const html = await response.text();
 
@@ -35,9 +34,8 @@ async function searchResults(keyword) {
       }
     }
 
-    // console.log(results);
-    return results;
-
+    console.log(JSON.stringify(results));
+    return JSON.stringify(results);
   } catch (error) {
     console.log('Fetch error:', error);
     return [{ title: 'Error', image: '', href: '' }];
@@ -66,8 +64,8 @@ async function extractDetails(url) {
       airdate: airdate
     });
 
-    // console.log(details);
-    return details;
+    console.log(JSON.stringify(details));
+    return JSON.stringify(details);
   } catch (error) {
     console.log('Details error:', error);
     return [{
@@ -119,8 +117,8 @@ async function extractEpisodes(url) {
       }
     }
 
-    // console.log(episodes);
-    return episodes;
+    console.log(JSON.stringify(episodes));
+    return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
   }
@@ -171,7 +169,7 @@ async function extractStreamUrl(url) {
         subtitles: ""
       };
 
-      // console.log(result);
+      console.log(JSON.stringify(result));
       return JSON.stringify(result);
     }
   } catch (error) {
