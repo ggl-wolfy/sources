@@ -1,0 +1,17 @@
+{
+    "sourceName": "GimyTV",
+    "iconUrl": "https://raw.githubusercontent.com/gglwolfy/sources/refs/heads/main/hianime/iconapp.png",
+    "author": {
+        "name": "GGL",
+        "icon": "https://i.redd.it/snoovatar/avatars/495200d3-4111-4dce-acd3-f69113e08179.png"
+    },
+    "version": "1.0.0",
+    "language": "Chinese",
+    "streamType": "HLS",
+    "quality": "720p",
+    "baseUrl": "https://gimy.tv/",
+    "searchBaseUrl": "https://gimy.tv/search/-------------.html?wd=%s&submit=",
+    "scriptUrl": "https://raw.githubusercontent.com/50n50/sources/refs/heads/main/hianimeSUBS/hianimeSUBS.js",
+    "asyncJS": true,
+    "softsub": false
+}
