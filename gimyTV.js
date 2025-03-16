@@ -35,7 +35,7 @@ async function searchResults(keyword) {
       }
     }
 
-    console.log(results);
+    // console.log(results);
     return results;
 
   } catch (error) {
@@ -66,7 +66,7 @@ async function extractDetails(url) {
       airdate: airdate
     });
 
-    console.log(details);
+    // console.log(details);
     return details;
   } catch (error) {
     console.log('Details error:', error);
@@ -119,7 +119,7 @@ async function extractEpisodes(url) {
       }
     }
 
-    console.log(episodes);
+    // console.log(episodes);
     return episodes;
   } catch (error) {
     console.log('Episode error:', error);
@@ -158,7 +158,7 @@ async function extractStreamUrl(url) {
 
       streams.push({ width, height, url });
     }
-    console.log(streams)
+    // console.log(streams)
 
     if (streams.length > 0) {
       // Calculate pixel count to compare resolution sizes.
@@ -171,7 +171,7 @@ async function extractStreamUrl(url) {
         subtitles: ""
       };
 
-      console.log(result);
+      // console.log(result);
       return JSON.stringify(result);
     }
   } catch (error) {
@@ -179,9 +179,3 @@ async function extractStreamUrl(url) {
     return JSON.stringify({ stream: null, subtitles: null });
   }
 }
-
-
-searchResults("爱你")
-// extractDetails("https://gimy.tv/vod/180715.html")
-// extractEpisodes("https://gimy.tv/vod/180715.html")
-// extractStreamUrl("https://gimy.tv/ep-180715-1-1.html")
