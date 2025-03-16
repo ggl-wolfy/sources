@@ -109,11 +109,11 @@ async function extractEpisodes(url) {
           const href = episodeMatch[1].trim();
           const episodeNumText = episodeMatch[2];
           const episodeNum = episodeNumText.match(episodeNumRegex)
-          const episodeNumStr = String(parseInt(episodeNum[1].trim()));
+          const episodeNumber = parseInt(episodeNum[1].trim());
 
           episodes.push({
             href: baseURL + href,
-            number: episodeNumStr
+            number: episodeNumber
           });
         }
       }
