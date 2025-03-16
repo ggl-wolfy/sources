@@ -89,6 +89,7 @@ async function extractEpisodes(url) {
 
   try {
     const html = await fetch(url);
+    // const response = await fetch(url);
     // const html = await response.text();
 
     // Attempt to extract source from the <div class="col-md-wide-7"> list
@@ -100,20 +101,23 @@ async function extractEpisodes(url) {
       const sourceHtml = source[1];
       const sourceNameMatch = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameMatch[1].trim()
+      console.log(sourceName)
 
-      // Extract episodes from source and then from <li>
-      const episodesMatch = sourceHtml.matchAll(episodeRegex);
+      if (sourceName == "顺畅线路"){
+        // Extract episodes from source and then from <li>
+        const episodesMatch = sourceHtml.matchAll(episodeRegex);
 
-      for (const episodeMatch of episodesMatch) {
-        const href = episodeMatch[1].trim();
-        const episodeNumText = episodeMatch[2];
-        const episodeNum = episodeNumText.match(episodeNumRegex)
-        // console.log(`episode: ${episodeNum}, href: ${href}`)
+        for (const episodeMatch of episodesMatch) {
+          const href = episodeMatch[1].trim();
+          const episodeNumText = episodeMatch[2];
+          const episodeNum = episodeNumText.match(episodeNumRegex)
+          // console.log(`episode: ${episodeNum}, href: ${href}`)
 
-        episodes.push({
-          href: baseURL + href,
-          number: sourceName + episodeNum[1].trim().padStart(2, "0")
-        });
+          episodes.push({
+            href: baseURL + href,
+            number: episodeNum[1].trim().padStart(2, "0")
+          });
+        }
       }
     }
 
