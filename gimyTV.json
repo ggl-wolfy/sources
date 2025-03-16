@@ -1,6 +1,6 @@
 {
     "sourceName": "GimyTV",
-    "iconUrl": "https://raw.githubusercontent.com/gglwolfy/sources/refs/heads/main/hianime/iconapp.png",
+    "iconUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimy.png",
     "author": {
         "name": "GGL",
         "icon": "https://i.redd.it/snoovatar/avatars/495200d3-4111-4dce-acd3-f69113e08179.png"
@@ -11,7 +11,7 @@
     "quality": "720p",
     "baseUrl": "https://gimy.tv/",
     "searchBaseUrl": "https://gimy.tv/search/-------------.html?wd=%s&submit=",
-    "scriptUrl": "https://raw.githubusercontent.com/50n50/sources/refs/heads/main/hianimeSUBS/hianimeSUBS.js",
+    "scriptUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimyTV.js",
     "asyncJS": true,
     "softsub": false
 }
