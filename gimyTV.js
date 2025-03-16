@@ -89,8 +89,6 @@ async function extractEpisodes(url) {
 
   try {
     const html = await fetch(url);
-    // const response = await fetch(url);
-    // const html = await response.text();
 
     // Attempt to extract source from the <div class="col-md-wide-7"> list
     const sourcesMatch = html.match(sourcesRegex);
@@ -111,11 +109,11 @@ async function extractEpisodes(url) {
           const href = episodeMatch[1].trim();
           const episodeNumText = episodeMatch[2];
           const episodeNum = episodeNumText.match(episodeNumRegex)
-          // console.log(`episode: ${episodeNum}, href: ${href}`)
+          const episodeNumStr = String(parseInt(episodeNum[1].trim()));
 
           episodes.push({
             href: baseURL + href,
-            number: episodeNum[1].trim().padStart(2, "0")
+            number: episodeNumStr
           });
         }
       }
@@ -132,7 +130,6 @@ async function extractEpisodes(url) {
 async function extractStreamUrl(url) {
   try {
     const html = await fetch(url);
-    // const html = await response.text();
 
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)"/);
     const streamUrlEscaped = streamHtml[1];
@@ -160,7 +157,6 @@ async function extractStreamUrl(url) {
 
       streams.push({ width, height, url });
     }
-    // console.log(streams)
 
     if (streams.length > 0) {
       // Calculate pixel count to compare resolution sizes.
