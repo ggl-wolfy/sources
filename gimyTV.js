@@ -93,21 +93,24 @@ async function extractEpisodes(url) {
     const sourcesHtml = sourcesMatch[1];
     const sourceMatch = sourcesHtml.matchAll(sourceRegex);
 
+    // Episode 205 -> Episode 5 from streaming source 2
+    let count = 1;
+
     for (const source of sourceMatch) {
-      const sourceHtml = source[1];
-      const sourceNameMatch = sourceHtml.match(sourceNameRegex);
-      const sourceName = sourceNameMatch[1].trim();
+      let debugEpCount = 0;
+      
+      const sourceHtml = source[1]
+      const sourceNameHtml = sourceHtml.match(sourceNameRegex);
+      const sourceName = sourceNameHtml[1].trim();
       console.log(sourceName);
 
       // Extract episodes from source and then from <li>
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
 
-      // Episode 205 -> Episode 5 from streaming source 2
-      let count = 1;
-
       for (const episodeMatch of episodesMatch) {
         const href = episodeMatch[1].trim();
         const episodeNumText = episodeMatch[2];
+        
         const episodeNum = episodeNumText.match(episodeNumRegex);
         const episodeNumber = count*100 + parseInt(episodeNum[1].trim());
 
@@ -117,12 +120,14 @@ async function extractEpisodes(url) {
             number: episodeNumber,
             title: `[${sourceName}] ${episodeNumText}`
           });
+          debugEpCount++;
         }
-        count++;
       }
+      console.log(`Source [${sourceName}] has a total of ${debugEpCount} episodes.`);
+      count++;
     }
 
-    console.log(JSON.stringify(episodes));
+    // console.log(JSON.stringify(episodes));
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', episodes);
