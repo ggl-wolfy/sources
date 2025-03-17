@@ -120,6 +120,7 @@ async function extractEpisodes(url) {
         }
       }
       count++;
+      console.log(`[episode ${episodeNumber}] ${episode}`)
     }
 
     // console.log(JSON.stringify(episodes));
