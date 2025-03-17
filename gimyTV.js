@@ -13,7 +13,7 @@ async function fetchHtml(url) {
     if (!response.ok) throw new Error(`[${response.status}] HTTP error!`);
     return response;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.log('Fetch error:', error);
     throw error;
   }
 }
@@ -45,7 +45,7 @@ async function searchResults(keyword) {
     console.log(JSON.stringify(results));
     return JSON.stringify(results);
   } catch (error) {
-    console.error('Search error:', error);
+    console.log('Search error:', error);
     return [{ title: 'Error', image: '', href: '' }];
   }
 }
@@ -63,7 +63,7 @@ async function extractDetails(url) {
     const details = [{ description, alias: 'N/A', airdate }];
     return JSON.stringify(details);
   } catch (error) {
-    console.error('Details error:', error);
+    console.log('Details error:', error);
     return [{ description: 'Error loading description', aliases: 'Duration: Unknown', airdate: 'Aired: Unknown' }];
   }
 }
@@ -118,7 +118,7 @@ async function extractEpisodes(url) {
     }
     return JSON.stringify(episodes);
   } catch (error) {
-    console.error('Episode error:', error);
+    console.log('Episode error:', error);
     return JSON.stringify([]);
   }
 }
@@ -131,7 +131,7 @@ async function extractStreamUrl(url) {
     // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
     if (!streamHtml) {
-      console.error(`Failed to extract stream from ${url}`);
+      console.log(`Failed to extract stream from ${url}`);
       return null;
     }
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
@@ -141,7 +141,7 @@ async function extractStreamUrl(url) {
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
     if (!streamMatch) {
-      console.error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
+      console.log(`Failed to extract stream URL from ${streamBase}index.m3u8`);
       return null;
     }
     const result = streamBase + streamMatch[2];
@@ -149,7 +149,7 @@ async function extractStreamUrl(url) {
     console.log(result);
     return result;
   } catch (error) {
-    console.error('Fetch error:', error);
+    console.log('Fetch error:', error);
     return null;
   }
 }
