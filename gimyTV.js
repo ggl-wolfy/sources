@@ -117,7 +117,8 @@ async function extractEpisodes(url) {
             href: baseURL + href,
             number: episodeNumber
           });
-          console.log(`[episode ${episodeNumber}] ${episode}`);
+          console.log(`[episode ${episodeNumber}]`);
+          console.log(JSON.stringify(episodes));
         }
       }
       count++;
