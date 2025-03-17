@@ -6,10 +6,8 @@ async function searchResults(keyword) {
 
   try {
     const html = await fetch(`https://gimy.tv/search/-------------.html?wd=${keyword}&submit=`);
-    // const html = await response.text();
 
     const items = html.matchAll(listRegex);
-
     for (const item of items) {
       const itemHtml = item[1];
 
@@ -48,7 +46,6 @@ async function extractDetails(url) {
 
   try {
     const html = await fetch(url);
-    // const html = await response.text();
 
     // Extract description from the <div ... class="content"><p>Desc Here</p>
     const descriptionMatch = html.match(/<div[^>]*content">\s*<p>([\s\S]*?)<\/p>/);
@@ -113,10 +110,14 @@ async function extractEpisodes(url) {
         const episodeNum = episodeNumText.match(episodeNumRegex)
         const episodeNumber = count * 100 + parseInt(episodeNum[1].trim());
 
-        episodes.push({
-          href: baseURL + href,
-          number: episodeNumber
-        });
+        console.log(episodeNumber)
+
+        if (href && episodeNumber) {
+          episodes.push({
+            href: baseURL + href,
+            number: episodeNumber
+          });
+        }
       }
       count++;
     }
@@ -124,7 +125,7 @@ async function extractEpisodes(url) {
     // console.log(JSON.stringify(episodes));
     return JSON.stringify(episodes);
   } catch (error) {
-    console.log('Episode error:', error);
+    console.log('Episode error:', episodes);
   }
 }
 
@@ -139,7 +140,7 @@ async function extractStreamUrl(url) {
     // Remove "index.m3u8" from streamUrl to get streamBase
     const streamBase = streamUrl.substring(0, streamUrl.length - 10)
 
-    console.log(`Stream URL: ${streamUrl}`)
+    // console.log(`${streamUrl}, ${streamBase}`)
 
     const responseFile = await fetch(decodeURIComponent(streamUrl));
     const fileData = await responseFile.text();
@@ -159,7 +160,7 @@ async function extractStreamUrl(url) {
 
       streams.push({ width, height, url });
     }
-    console.log(streams)
+    // console.log(streams)
 
     if (streams.length > 0) {
       // Calculate pixel count to compare resolution sizes.
