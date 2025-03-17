@@ -96,7 +96,7 @@ async function extractEpisodes(url) {
     const sourceMatch = sourcesHtml.matchAll(sourceRegex);
 
     // Using "Episode 101" to denote episode 1 from stream source 1 (first digit)
-    const count = 1;
+    let count = 1;
 
     for (const source of sourceMatch) {
       const sourceHtml = source[1];
@@ -121,7 +121,7 @@ async function extractEpisodes(url) {
       count++;
     }
 
-    console.log(JSON.stringify(episodes));
+    // console.log(JSON.stringify(episodes));
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
