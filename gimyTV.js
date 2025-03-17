@@ -97,21 +97,25 @@ async function extractEpisodes(url) {
     let count = 1;
 
     for (const source of sourceMatch) {
+      // Count number of episodes from each source
       let debugEpCount = 0;
-      
+
       const sourceHtml = source[1]
       const sourceNameHtml = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameHtml[1].trim();
-      console.log(sourceName);
 
       // Extract episodes from source and then from <li>
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
+      if (!episodesMatch) {
+        console.log(`Episode error: fail to extract from source ${sourceName}`)
+      }
 
       for (const episodeMatch of episodesMatch) {
         const href = episodeMatch[1].trim();
         const episodeNumText = episodeMatch[2];
-        
         const episodeNum = episodeNumText.match(episodeNumRegex);
+
+        if (!episodeNum) continue;
         const episodeNumber = count*100 + parseInt(episodeNum[1].trim());
 
         if (href && episodeNumber) {
@@ -127,10 +131,10 @@ async function extractEpisodes(url) {
       count++;
     }
 
-    // console.log(JSON.stringify(episodes));
+    // console.log(episodes);
     return JSON.stringify(episodes);
   } catch (error) {
-    console.log('Episode error:', episodes);
+    console.log('Episode error:', error);
   }
 }
 
