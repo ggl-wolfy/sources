@@ -113,7 +113,7 @@ async function extractEpisodes(url) {
         if (!episodeNum) continue;
         const number = count * 100 + parseInt(episodeNum[1].trim());
 
-        if (href && episodeNumber) {
+        if (href && number) {
           episodes.push({ href, number, title: `[${sourceName}] ${episodeNumText}` });
           debugEpCount++;
         }
