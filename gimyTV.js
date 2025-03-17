@@ -106,24 +106,24 @@ async function extractEpisodes(url) {
 
       for (const episodeMatch of episodesMatch) {
         const href = episodeMatch[1].trim();
+        console.log(href);
         const episodeNumText = episodeMatch[2];
-        const episodeNum = episodeNumText.match(episodeNumRegex)
+        console.log(episodeNumText);
+        const episodeNum = episodeNumText.match(episodeNumRegex);
         const episodeNumber = count * 100 + parseInt(episodeNum[1].trim());
-
-        console.log(episodeNumber)
 
         if (href && episodeNumber) {
           episodes.push({
             href: baseURL + href,
             number: episodeNumber
           });
+          console.log(`[episode ${episodeNumber}] ${episode}`);
         }
       }
       count++;
-      console.log(`[episode ${episodeNumber}] ${episode}`)
     }
 
-    // console.log(JSON.stringify(episodes));
+    console.log(JSON.stringify(episodes));
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', episodes);
