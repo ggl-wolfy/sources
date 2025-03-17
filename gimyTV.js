@@ -130,12 +130,9 @@ async function extractEpisodes(url) {
 async function extractStreamUrl(url) {
   try {
     // Testing
-    return JSON.stringify({
-      stream: "https://v6.tlkqc.com/wjv6/202502/25/ZLcmvNqea878/video/1000k_720/hls/index.m3u8",
-      subtitles: ""
-    });
+    return "https://v6.tlkqc.com/wjv6/202502/25/ZLcmvNqea878/video/1000k_720/hls/index.m3u8";
   } catch (error) {
     console.log('Fetch error:', error);
-    return JSON.stringify({ stream: null, subtitles: null });
+    return null;
   }
 }
