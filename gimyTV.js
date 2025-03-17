@@ -96,26 +96,29 @@ async function extractEpisodes(url) {
     for (const source of sourceMatch) {
       const sourceHtml = source[1];
       const sourceNameMatch = sourceHtml.match(sourceNameRegex);
-      const sourceName = sourceNameMatch[1].trim()
-
-      if (sourceName != "火箭线路") continue
-      console.log(sourceName)
+      const sourceName = sourceNameMatch[1].trim();
+      console.log(sourceName);
 
       // Extract episodes from source and then from <li>
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
+
+      // Episode 205 -> Episode 5 from streaming source 2
+      let count = 1;
 
       for (const episodeMatch of episodesMatch) {
         const href = episodeMatch[1].trim();
         const episodeNumText = episodeMatch[2];
         const episodeNum = episodeNumText.match(episodeNumRegex);
-        const episodeNumber = parseInt(episodeNum[1].trim());
+        const episodeNumber = count*100 + parseInt(episodeNum[1].trim());
 
         if (href && episodeNumber) {
           episodes.push({
             href: baseURL + href,
-            number: episodeNumber
+            number: episodeNumber,
+            title: `[${sourceName}] ${episodeNumText}`
           });
         }
+        count++;
       }
     }
 
