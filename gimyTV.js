@@ -109,11 +109,9 @@ async function extractEpisodes(url) {
         const href = baseUrl + episodeMatch[1].trim();
         const episodeNumText = episodeMatch[2];
         const episodeNum = episodeNumText.match(episodeNumRegex);
-        console.log(href, episodeNum);
 
         if (!episodeNum) continue;
         const number = count * 100 + parseInt(episodeNum[1].trim());
-        console.log(href, number);
 
         if (href && number) {
           episodes.push({ href, number, title: `[${sourceName}] ${episodeNumText}` });
@@ -151,7 +149,8 @@ async function extractStreamUrl(url) {
       return null;
     }
     // const resolution = streamMatch[1];
-    const result = streamBase + streamMatch[2];
+    const resultUrl = new URL(streamMatch[2], streamBase);
+    const result = resultUrl.href;
     console.log(result);
     return result;
   } catch (error) {
