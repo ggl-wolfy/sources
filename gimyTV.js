@@ -85,6 +85,8 @@ async function extractEpisodes(url) {
     const sourcesHtml = sourcesMatch[1];
     const sourceMatch = sourcesHtml.matchAll(sourceRegex);
 
+    if (!sourceMatch) { console.log(`Failed to extract source`) };
+
     // Episode 205 -> Episode 5 from streaming source 2
     let count = 1;
 
@@ -95,6 +97,7 @@ async function extractEpisodes(url) {
       const sourceHtml = source[1];
       const sourceNameHtml = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameHtml[1].trim();
+      console.log(sourceName);
 
       // Extract episodes from source and then from <li>
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
