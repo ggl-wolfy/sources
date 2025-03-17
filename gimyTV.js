@@ -28,6 +28,7 @@ async function searchResults(keyword) {
 
   try {
     const html = await fetchHtml(`${baseUrl}/search/-------------.html?wd=${keyword}&submit=`);
+    console.log("Fetched search page")
 
     const items = html.matchAll(listRegex);
     for (const item of items) {
@@ -36,7 +37,7 @@ async function searchResults(keyword) {
       const href = baseUrl + extractMatch(hrefRegex, itemHtml);
       const title = extractMatch(titleRegex, itemHtml);
       const image = extractMatch(imgRegex, itemHtml);
-
+      console.log(`${title} [${href}]`)
       if (href && title && image) {
         results.push({ title, image, href });
       }
