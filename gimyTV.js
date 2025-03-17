@@ -8,6 +8,7 @@ async function searchResults(keyword) {
     const html = await fetch(`https://gimy.tv/search/-------------.html?wd=${keyword}&submit=`);
 
     const items = html.matchAll(listRegex);
+
     for (const item of items) {
       const itemHtml = item[1];
 
@@ -92,13 +93,12 @@ async function extractEpisodes(url) {
     const sourcesHtml = sourcesMatch[1];
     const sourceMatch = sourcesHtml.matchAll(sourceRegex);
 
-    // Using "Episode 101" to denote episode 1 from stream source 1 (first digit)
-    let count = 1;
-
     for (const source of sourceMatch) {
       const sourceHtml = source[1];
       const sourceNameMatch = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameMatch[1].trim()
+
+      if (sourceName != "火箭线路") continue
       console.log(sourceName)
 
       // Extract episodes from source and then from <li>
@@ -106,22 +106,17 @@ async function extractEpisodes(url) {
 
       for (const episodeMatch of episodesMatch) {
         const href = episodeMatch[1].trim();
-        console.log(href);
         const episodeNumText = episodeMatch[2];
-        console.log(episodeNumText);
         const episodeNum = episodeNumText.match(episodeNumRegex);
-        const episodeNumber = count * 100 + parseInt(episodeNum[1].trim());
+        const episodeNumber = parseInt(episodeNum[1].trim());
 
         if (href && episodeNumber) {
           episodes.push({
             href: baseURL + href,
             number: episodeNumber
           });
-          console.log(`[episode ${episodeNumber}]`);
-          console.log(JSON.stringify(episodes));
         }
       }
-      count++;
     }
 
     console.log(JSON.stringify(episodes));
@@ -145,7 +140,7 @@ async function extractStreamUrl(url) {
     // console.log(`${streamUrl}, ${streamBase}`)
 
     const responseFile = await fetch(decodeURIComponent(streamUrl));
-    const fileData = await responseFile;
+    const fileData = responseFile;
 
     const regex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/g;
 
@@ -162,7 +157,7 @@ async function extractStreamUrl(url) {
 
       streams.push({ width, height, url });
     }
-    // console.log(streams)
+    console.log(streams)
 
     if (streams.length > 0) {
       // Calculate pixel count to compare resolution sizes.
