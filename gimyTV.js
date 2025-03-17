@@ -145,7 +145,7 @@ async function extractStreamUrl(url) {
     // console.log(`${streamUrl}, ${streamBase}`)
 
     const responseFile = await fetch(decodeURIComponent(streamUrl));
-    const fileData = await responseFile.text();
+    const fileData = await responseFile;
 
     const regex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/g;
 
