@@ -109,9 +109,11 @@ async function extractEpisodes(url) {
         const href = baseUrl + episodeMatch[1].trim();
         const episodeNumText = episodeMatch[2];
         const episodeNum = episodeNumText.match(episodeNumRegex);
+        console.log(href, episodeNum);
 
         if (!episodeNum) continue;
         const number = count * 100 + parseInt(episodeNum[1].trim());
+        console.log(href, number);
 
         if (href && number) {
           episodes.push({ href, number, title: `[${sourceName}] ${episodeNumText}` });
