@@ -95,28 +95,30 @@ async function extractEpisodes(url) {
     const sourcesHtml = sourcesMatch[1];
     const sourceMatch = sourcesHtml.matchAll(sourceRegex);
 
+    // Using "Episode 101" to denote episode 1 from stream source 1 (first digit)
+    const count = 1;
+
     for (const source of sourceMatch) {
       const sourceHtml = source[1];
       const sourceNameMatch = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameMatch[1].trim()
       console.log(sourceName)
 
-      if (sourceName == "顺畅线路"){
-        // Extract episodes from source and then from <li>
-        const episodesMatch = sourceHtml.matchAll(episodeRegex);
+      // Extract episodes from source and then from <li>
+      const episodesMatch = sourceHtml.matchAll(episodeRegex);
 
-        for (const episodeMatch of episodesMatch) {
-          const href = episodeMatch[1].trim();
-          const episodeNumText = episodeMatch[2];
-          const episodeNum = episodeNumText.match(episodeNumRegex)
-          const episodeNumber = parseInt(episodeNum[1].trim());
+      for (const episodeMatch of episodesMatch) {
+        const href = episodeMatch[1].trim();
+        const episodeNumText = episodeMatch[2];
+        const episodeNum = episodeNumText.match(episodeNumRegex)
+        const episodeNumber = count * 100 + parseInt(episodeNum[1].trim());
 
-          episodes.push({
-            href: baseURL + href,
-            number: episodeNumber
-          });
-        }
+        episodes.push({
+          href: baseURL + href,
+          number: episodeNumber
+        });
       }
+      count++;
     }
 
     console.log(JSON.stringify(episodes));
@@ -137,7 +139,7 @@ async function extractStreamUrl(url) {
     // Remove "index.m3u8" from streamUrl to get streamBase
     const streamBase = streamUrl.substring(0, streamUrl.length - 10)
 
-    // console.log(`${streamUrl}, ${streamBase}`)
+    console.log(`Stream URL: ${streamUrl}`)
 
     const responseFile = await fetch(decodeURIComponent(streamUrl));
     const fileData = await responseFile.text();
@@ -157,6 +159,7 @@ async function extractStreamUrl(url) {
 
       streams.push({ width, height, url });
     }
+    console.log(streams)
 
     if (streams.length > 0) {
       // Calculate pixel count to compare resolution sizes.
