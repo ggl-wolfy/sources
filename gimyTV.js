@@ -130,49 +130,15 @@ async function extractEpisodes(url) {
 async function extractStreamUrl(url) {
   try {
     const html = await fetch(url);
-
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)"/);
     const streamUrlEscaped = streamHtml[1];
     const streamUrl = streamUrlEscaped.replace(/(?:\\(.))/g, '$1');
-    // Remove "index.m3u8" from streamUrl to get streamBase
-    const streamBase = streamUrl.substring(0, streamUrl.length - 10)
+    const streamBase = streamUrl.substring(0, streamUrl.length - 10);
 
-    // console.log(`${streamUrl}, ${streamBase}`)
+    console.log(streamUrl);
 
-    const responseFile = await fetch(decodeURIComponent(streamUrl));
-    const fileData = responseFile;
-
-    const regex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/g;
-
-    let match;
-    const streams = [];
-
-    // Loop over all matches
-    while ((match = regex.exec(fileData)) !== null) {
-      const resolutionStr = match[1]; // e.g., "1920x1080"
-      const url = streamBase + match[2];
-
-      // Convert resolution into numbers for comparison.
-      const [width, height] = resolutionStr.split('x').map(Number);
-
-      streams.push({ width, height, url });
-    }
-    console.log(streams)
-
-    if (streams.length > 0) {
-      // Calculate pixel count to compare resolution sizes.
-      streams.sort((a, b) => (b.width * b.height) - (a.width * a.height));
-
-      const highestStreamUrl = streams[0].url;
-
-      const result = {
-        stream: highestStreamUrl,
-        subtitles: ""
-      };
-
-      console.log(JSON.stringify(result));
-      return JSON.stringify(result);
-    }
+    // Testing
+    return JSON.stringify({ stream: "https://v6.tlkqc.com/wjv6/202502/25/ZLcmvNqea878/video/1000k_720/hls/index.m3u8", subtitles: ""});
   } catch (error) {
     console.log('Fetch error:', error);
     return JSON.stringify({ stream: null, subtitles: null });
