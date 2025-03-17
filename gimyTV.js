@@ -129,16 +129,11 @@ async function extractEpisodes(url) {
 
 async function extractStreamUrl(url) {
   try {
-    const html = await fetch(url);
-    const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)"/);
-    const streamUrlEscaped = streamHtml[1];
-    const streamUrl = streamUrlEscaped.replace(/(?:\\(.))/g, '$1');
-    const streamBase = streamUrl.substring(0, streamUrl.length - 10);
-
-    console.log(streamUrl);
-
     // Testing
-    return JSON.stringify({ stream: "https://v6.tlkqc.com/wjv6/202502/25/ZLcmvNqea878/video/1000k_720/hls/index.m3u8", subtitles: ""});
+    return JSON.stringify({
+      stream: "https://v6.tlkqc.com/wjv6/202502/25/ZLcmvNqea878/video/1000k_720/hls/index.m3u8",
+      subtitles: ""
+    });
   } catch (error) {
     console.log('Fetch error:', error);
     return JSON.stringify({ stream: null, subtitles: null });
