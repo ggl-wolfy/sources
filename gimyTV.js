@@ -97,7 +97,7 @@ async function extractEpisodes(url) {
       const sourceHtml = source[1];
       const sourceNameHtml = sourceHtml.match(sourceNameRegex);
       const sourceName = sourceNameHtml[1].trim();
-      console.log(sourceName);
+      // console.log(sourceName);
 
       // Extract episodes from source and then from <li>
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
@@ -118,7 +118,7 @@ async function extractEpisodes(url) {
           debugEpCount++;
         }
       }
-      console.log(`Source [${sourceName}] has a total of ${debugEpCount} episodes.`);
+      // console.log(`Source [${sourceName}] has a total of ${debugEpCount} episodes.`);
       count++;
     }
 
@@ -138,10 +138,12 @@ async function extractStreamUrl(url) {
     // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
+    console.log(`stream base is ${streamBase}`);
 
     const responseFile = await fetch(streamBase + "index.m3u8");
     const fileData = responseFile;
-
+    console.log(fileData);
+    
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
     if (!streamMatch) {
