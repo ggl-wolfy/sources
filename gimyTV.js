@@ -131,41 +131,48 @@ async function extractEpisodes(url) {
 }
 
 
+function urlConstructor(url, base) {
+  let result = base.replace(/\/$/, '');
+
+  const parts = url.split("/");
+
+  for (const part of parts) {
+    if (part == '') continue
+    if (!base.includes(part)) {
+      result += `/${part}`
+    }
+  }
+  // console.log(result);
+  return result
+}
+
+
 async function extractStreamUrl(url) {
   try {
-    const html = await fetch(url);
+    // const html = await fetch(url);
+    const response = await fetch(url);
+    const html = await response.text();
 
     // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
+    // console.log(streamBase);
 
     const responseFile = await fetch(streamBase + "index.m3u8");
-    const fileData = responseFile;
-    
+    // const fileData = responseFile;
+    const fileData = await responseFile.text();
+    // console.log(fileData);
+
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
     if (!streamMatch) {
       console.error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
       return null;
-    }
-    // const resolution = streamMatch[1];
-    console.log(streamMatch[2]);
-
-    let result = null;
-
-    console.log("-----------------------");
-    console.log(URL);
-    console.log("-----------------------");
-    
-    if ("parse" in URL) {
-      result = URL.parse(streamMatch[2], streamBase);
-      console.log(`Here is the result: ${result}`);
-      result = result.href;
     } else {
-      console.log("URL.parse() not supported")
+      const result = urlConstructor(streamMatch[2], streamBase);
+      console.log("streaming URL: ", result);
+      return result;
     }
-    console.log("here: ", result);
-    return result;
   } catch (error) {
     console.log('Fetch error:', error);
     return null;
