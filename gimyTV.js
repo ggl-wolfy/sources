@@ -138,11 +138,9 @@ async function extractStreamUrl(url) {
     // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
-    console.log(`stream base is ${streamBase}`);
 
     const responseFile = await fetch(streamBase + "index.m3u8");
     const fileData = responseFile;
-    console.log(fileData);
     
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
@@ -152,10 +150,16 @@ async function extractStreamUrl(url) {
     }
     // const resolution = streamMatch[1];
     console.log(streamMatch[2]);
-    const resultUrl = new URL(streamMatch[2], streamBase);
-    console.log(`Result URL: ${resultUrl}`);
-    const result = resultUrl.href;
-    console.log(result);
+
+    let result = null;
+
+    if ("parse" in URL) {
+      result = URL.parse(streamMatch[2], streamBase);
+      console.log(`Here is the result: ${result}`)
+    } else {
+      console.log("URL.parse() not supported")
+    }
+    console.log("here: ", result);
     return result;
   } catch (error) {
     console.log('Fetch error:', error);
