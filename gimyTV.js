@@ -151,7 +151,9 @@ async function extractStreamUrl(url) {
       return null;
     }
     // const resolution = streamMatch[1];
+    console.log(streamMatch[2]);
     const resultUrl = new URL(streamMatch[2], streamBase);
+    console.log(`Result URL: ${resultUrl}`);
     const result = resultUrl.href;
     console.log(result);
     return result;
