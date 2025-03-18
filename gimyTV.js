@@ -153,9 +153,14 @@ async function extractStreamUrl(url) {
 
     let result = null;
 
+    console.log("-----------------------");
+    console.log(URL);
+    console.log("-----------------------");
+    
     if ("parse" in URL) {
       result = URL.parse(streamMatch[2], streamBase);
-      console.log(`Here is the result: ${result}`)
+      console.log(`Here is the result: ${result}`);
+      result = result.href;
     } else {
       console.log("URL.parse() not supported")
     }
