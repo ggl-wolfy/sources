@@ -149,9 +149,7 @@ function urlConstructor(url, base) {
 
 async function extractStreamUrl(url) {
   try {
-    // const html = await fetch(url);
-    const response = await fetch(url);
-    const html = await response.text();
+    const html = await fetch(url);
 
     // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
@@ -159,9 +157,8 @@ async function extractStreamUrl(url) {
     // console.log(streamBase);
 
     const responseFile = await fetch(streamBase + "index.m3u8");
-    // const fileData = responseFile;
-    const fileData = await responseFile.text();
-    // console.log(fileData);
+    const fileData = responseFile;
+    console.log(fileData);
 
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
@@ -170,7 +167,7 @@ async function extractStreamUrl(url) {
       return null;
     } else {
       const result = urlConstructor(streamMatch[2], streamBase);
-      console.log("streaming URL: ", result);
+      console.log(`streaming URL: ${result} [${streamMatch[2]}]`);
       return result;
     }
   } catch (error) {
