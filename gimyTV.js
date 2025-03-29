@@ -21,7 +21,7 @@ async function searchResults(keyword) {
       const imgMatch = itemHtml.match(imgRegex);
 
       if (hrefMatch && titleMatch && imgMatch) {
-        const relHref = episodeMatch[1].trim();
+        const href = baseUrl + hrefMatch[1].trim();
         const title = titleMatch[1].trim();
         const image = imgMatch[1].trim();
 
