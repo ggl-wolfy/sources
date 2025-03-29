@@ -133,6 +133,7 @@ async function extractStreamUrl(url) {
       return null;
     }
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
+    console.log(streamBase);
     
     const responseFile = await fetch(streamBase + 'index.m3u8');
     const fileData = responseFile;
