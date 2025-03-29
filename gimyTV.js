@@ -145,7 +145,8 @@ async function extractStreamUrl(url) {
     }
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
 
-    const fileData = await fetch(streamBase + 'index.m3u8');
+    const responseFile = await fetch(streamBase + 'index.m3u8');
+    const fileData = responseFile;
 
     const streamRegex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/;
     const streamMatch = fileData.match(streamRegex);
@@ -153,7 +154,9 @@ async function extractStreamUrl(url) {
       throw new Error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
     }
     
-    return urlConstructor(streamMatch[2], streamBase);
+    const result = urlConstructor(streamMatch[2], streamBase);
+    console.log(`Streaming URL: ${result} [${streamMatch[2]}]`);
+    return result
   } catch (error) {
     console.log('Streaming error:', error);
     return null;
