@@ -1,11 +1,6 @@
 const baseUrl = "https://gimy.tv";
 
 
-function extractMatch(regex, text) {
-  const match = text.match(regex);
-  return match ? match[1].trim() : null;
-}
-
 async function searchResults(keyword) {
   const results = [];
   const listRegex = /<li class="clearfix">([\s\S]*?)<\/li>/g;
@@ -20,15 +15,20 @@ async function searchResults(keyword) {
 
     for (const item of items) {
       const itemHtml = item[1];
-      const relHref = extractMatch(hrefRegex, itemHtml);
-      const title = extractMatch(titleRegex, itemHtml);
-      const image = extractMatch(imgRegex, itemHtml);
 
-      if (!relHref || !title || !image) continue;
-      results.push({ title, image, href: baseUrl + relHref });
+      const hrefMatch = itemHtml.match(hrefRegex);
+      const titleMatch = itemHtml.match(titleRegex);
+      const imgMatch = itemHtml.match(imgRegex);
+
+      if (hrefMatch && titleMatch && imgMatch) {
+        const href = baseUrl + hrefMatch[1].trim();
+        const title = titleMatch[1].trim();
+        const image = imgMatch[1].trim();
+
+        results.push({ title, image, href });
+      }
     }
 
-    console.log(JSON.stringify(results));
     return JSON.stringify(results);
   } catch (error) {
     console.log('Search error:', error);
@@ -44,10 +44,14 @@ async function extractDetails(url) {
   try {
     const html = await fetch(url);
 
-    const description = extractMatch(descriptionRegex, html) || 'Error loading description';
-    const airdate = extractMatch(airdateRegex, html) || 'Aired/Released: Unknown';
+    const descriptionMatch = html.match(descriptionRegex);
+    const description = descriptionMatch ? descriptionMatch[1].trim() : 'Error loading description';
+
+    const airdateMatch = html.match(airdateRegex);
+    const airdate = airdateMatch ? airdateMatch[1].trim() : 'Aired/Released: Unknown';
+
     const details = [{ description, alias: 'N/A', airdate }];
-    console.log(JSON.stringify(details));
+
     return JSON.stringify(details);
   } catch (error) {
     console.log('Details error:', error);
@@ -75,17 +79,18 @@ async function extractEpisodes(url) {
 
     // Episode 205 -> Episode 5 from streaming source 2
     let count = 1;
+
     for (const source of sourceMatch) {
       // Count number of episodes from each source
       let sourceEpisodeCount = 0;
 
       const sourceHtml = source[1];
-      const sourceName = extractMatch(sourceNameRegex, sourceHtml);
+      const sourceNameHtml = sourceHtml.match(sourceNameRegex);
+      const sourceName = sourceNameHtml[1].trim();
       
       const episodesMatch = sourceHtml.matchAll(episodeRegex);
-
       if (!episodesMatch) {
-        console.log(`Fail to extract from source ${sourceName}`);
+        console.log(`Episode error: fail to extract from source ${sourceName}`);
         continue;
       }
 
@@ -93,32 +98,28 @@ async function extractEpisodes(url) {
       let previousEpisode = 0;
 
       for (const episodeMatch of episodesMatch) {
-        const relHref = extractMatch(/href="([^"]*)"/, episodeMatch[0]);
-        const episodeNumText = extractMatch(/">([\s\S]*?)<\/a>/, episodeMatch[0]);
-        const episodeNum = extractMatch(episodeNumRegex, episodeNumText);
-        const title = sourceName;
+        const href = baseUrl + episodeMatch[1].trim();
+        const episodeNumText = episodeMatch[2];
+        const episodeNum = episodeNumText.match(episodeNumRegex);
 
-        // TODO: Discarding episodes with no numbering such as special episodes
         if (!episodeNum || !relHref) {
           console.log(`Episode [${episodeNumText}] skipped [${relHref}]`);
           continue;
         }
-
-        const number = count * 100 + parseInt(episodeNum);
+        const number = count * 100 + parseInt(episodeNum[1].trim());
 
         // Skipping duplicate episodes (having the same or lower episode numbering)
         if (number <= previousEpisode) {
-          console.log(`Duplicate Episode [${episodeNumText}] skipped [${relHref}]`);
+          console.log(`Duplicate Episode [${epi}] skipped [${relHref}]`);
           continue
         }
 
         episodes.push({ href: baseUrl + relHref, number, title });
         sourceEpisodeCount++;
-        previousEpisode = number;
       }
-    
       count++;
     }
+
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
@@ -137,7 +138,8 @@ function urlConstructor(url, base) {
 async function extractStreamUrl(url) {
   try {
     const html = await fetch(url);
-    
+
+    // Extract streamBase by removing index.m3u8 from matched URL
     const streamHtml = html.match(/player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/);
     if (!streamHtml) {
       console.log(`Failed to extract stream from ${url}`);
@@ -153,12 +155,11 @@ async function extractStreamUrl(url) {
     if (!streamMatch) {
       throw new Error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
     }
-    
     const result = urlConstructor(streamMatch[2], streamBase);
     console.log(`Streaming URL: ${result} [${streamMatch[2]}]`);
-    return result
+    return result;
   } catch (error) {
-    console.log('Streaming error:', error);
+    console.log('Fetch error:', error);
     return null;
   }
 }
