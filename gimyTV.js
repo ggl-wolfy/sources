@@ -117,9 +117,14 @@ async function extractEpisodes(url) {
 
 
 function urlConstructor(url, base) {
-  const result = base.replace(/\/$/, '');
+  const decodedUrl = base.replace(/\/$/, '');
+  const pathArray = decodedUrl.split('/');
+  const protocol = pathArray[0];
+  const host = pathArray[2];
+  const baseUrl = protocol + '//' + host;
+
   const parts = url.split('/').filter(part => part !== '');
-  return result + '/' + parts.join('/');
+  return baseUrl + '/' + parts.join('/');
 }
 
 
