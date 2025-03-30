@@ -20,7 +20,7 @@ const REGEX = {
 async function fetchHtml(url) {
   try {
     const response = await fetch(url);
-    if (!response.ok) { throw new Error(`Failed to fetch ${url}`) }
+    // if (!response.ok) { throw new Error(`Failed to fetch ${url}`) }
     return await response.text();
   } catch (error) {
     console.log('Fetch error:', error);
