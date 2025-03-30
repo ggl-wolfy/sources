@@ -2,14 +2,14 @@
 const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
-  detailsAirDate: /年份：<\/span>\s*<a[^>]*>([^<]+)<\/a>/,
-  detailsDesc: /<div[^>]*content">\s*<p>([\s\S]*?)<\/p>/,
+  detailsAirDate: /年份：<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
+  detailsDesc: /<div[^>]*content">[\s\S]*?<p>([\s\S]*?)<\/p>/,
   episodeData: /<a class="btn[^>]*href="([^"]*)">([\s\S]*?)<\/a>/g,
   episodeNum: /第(\d+)集/,
   episodeSource: /<div class="myui-panel myui[^>]*([\s\S]*?<\/ul>)/g,
   episodeSourceName: /<h3 class="title">([\s\S]*?)<\/h3>/,
   episodeSources: /col-md-wide-7[^>]*>([\s\S]*?)id="desc"/,
-  searchItemImg: /<a class="myui-vodlist__thumb.+data-original="([^"]+)"/,
+  searchItemImg: /<a class="myui-vodlist__thumb[\s\S]*?data-original="([^"]+)"/,
   searchItemTitle: /<h4 class="title"><a[^>]*>([\s\S]*?)<\/a>/,
   searchItemUrl: /<a class="myui-vodlist__thumb[\s\S]*?href="([^"]+)"/,
   searchList: /<li class="clearfix">([\s\S]*?)<\/li>/g,
@@ -20,9 +20,8 @@ const REGEX = {
 async function fetchHtml(url) {
   try {
     return await fetch(url);
-    // if (!response.ok) { throw new Error(`Failed to fetch ${url}`) }
   } catch (error) {
-    console.log('Fetch error:', error);
+    console.log(`Failed to fetch ${url}`);
     throw error;
   }
 }
@@ -45,19 +44,15 @@ async function searchResults(keyword) {
 
     for (const item of items) {
       const itemHtml = item[1];
-      const hrefMatch = itemHtml.match(REGEX.searchItemUrl);
-      const titleMatch = itemHtml.match(REGEX.searchItemTitle);
-      const imgMatch = itemHtml.match(REGEX.searchItemImg);
+      const href = extractMatches(itemHtml, REGEX.searchItemUrl);
+      const title = extractMatches(itemHtml, REGEX.searchItemTitle);
+      const image = extractMatches(itemHtml, REGEX.searchItemImg);
 
-      if (hrefMatch && titleMatch && imgMatch) {
-        const href = gimyBaseUrl + hrefMatch[1].trim();
-        const title = titleMatch[1].trim();
-        const image = imgMatch[1].trim();
-        results.push({ title, image, href });
+      if (href && title && image) {
+        results.push({ title, image, href: gimyBaseUrl + href });
       }
     }
-    console.log(results);
-
+    // console.log(JSON.stringify(results));
     return JSON.stringify(results);
   } catch (error) {
     console.log('Search error:', error);
@@ -68,12 +63,10 @@ async function searchResults(keyword) {
 async function extractDetails(url) {
   try {
     const html = await fetchHtml(url);
-    const descriptionMatch = html.match(REGEX.detailsDesc);
-    const description = descriptionMatch ? descriptionMatch[1].trim() : 'N/A';
-    const airdateMatch = html.match(REGEX.detailsAirDate);
-    const airdate = airdateMatch ? airdateMatch[1].trim() : 'N/A';
+    const description = extractMatches(html, REGEX.detailsDesc) || 'Error loading description';
+    const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
-    console.log(details);
+    // console.log(JSON.stringify(details));
     return JSON.stringify(details);
   } catch (error) {
     console.log('Details error:', error);
@@ -102,7 +95,7 @@ async function extractEpisodes(url) {
       const episodesMatch = extractMatches(sourceHtml, REGEX.episodeData, matchAll = true);
 
       if (!episodesMatch) {
-        console.log(`Episode error: fail to extract from source ${sourceName}`);
+        console.log(`Fail to extract from source: ${sourceName}`);
         continue;
       }
 
@@ -125,7 +118,7 @@ async function extractEpisodes(url) {
       count++;
     }
 
-    console.log(episodes);
+    // console.log(JSON.stringify(episodes));
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
@@ -140,7 +133,6 @@ function urlConstructor(baseUrl, relativeUrl) {
 
   const baseSegments = baseParts.slice(2).filter(segment => segment.length);
   const segments = relativeUrl.split('/').filter(segment => segment.length);
-
   const finalSegments = [...new Set([...baseSegments, ...segments])]; // Combine and deduplicate segments
 
   return `${protocol}//${finalSegments.join('/')}`;
