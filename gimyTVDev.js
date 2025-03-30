@@ -79,43 +79,39 @@ async function extractEpisodes(url) {
   try {
     const html = await fetchHtml(url);
     const sourcesMatch = html.match(REGEX.episodeSources);
-    if (!sourcesMatch) {
-      throw new Error('Failed to extract source');
-    }
+    if (!sourcesMatch) throw new Error('Failed to extract source');
+
     const sourcesHtml = sourcesMatch[1];
     const sourceMatch = extractMatches(sourcesHtml, REGEX.episodeSource, matchAll = true);
 
-    let count = 1;
+    let count = 100;
     for (const source of sourceMatch) {
-      let sourceEpisodeCount = 0;
-      let previousEpisodeCount = 0;
       const sourceHtml = source[1];
-      const sourceNameHtml = sourceHtml.match(REGEX.episodeSourceName);
-      const sourceName = sourceNameHtml ? sourceNameHtml[1].trim() : 'Unknown Source';
+      const sourceName = extractMatches(sourceHtml, REGEX.episodeSourceName)?.trim() || 'Unknown Source';
       const episodesMatch = extractMatches(sourceHtml, REGEX.episodeData, matchAll = true);
 
       if (!episodesMatch) {
-        console.log(`Fail to extract from source: ${sourceName}`);
+        console.log(`Failed to extract episodes from source [${sourceName}]`);
         continue;
       }
 
+      let previousEpisodeCount = 0;
+
       for (const episodeMatch of episodesMatch) {
         const href = gimyBaseUrl + episodeMatch[1].trim();
-        const episodeNumText = episodeMatch[2];
-        const episodeNum = episodeNumText.match(REGEX.episodeNum);
+        const episodeNumText = episodeMatch[2].match(REGEX.episodeNum);
+        const episodeNum = episodeNumText ? episodeNumText[1].trim() : '0';
+        const number = count + parseInt(episodeNum, 10);
 
-        if (!episodeNum) continue;
-        const number = count * 100 + parseInt(episodeNum[1].trim(), 10);
         if (number <= previousEpisodeCount) {
           console.log(`Skipped episode: [${episodeNumText}]`);
           continue;
         }
 
         episodes.push({ href, number, title: `[${sourceName}] ${episodeNumText}` });
-        sourceEpisodeCount++;
         previousEpisodeCount = number;
       }
-      count++;
+      count += 100;
     }
 
     // console.log(JSON.stringify(episodes));
@@ -125,7 +121,6 @@ async function extractEpisodes(url) {
     return JSON.stringify([]);
   }
 }
-
 
 function urlConstructor(baseUrl, relativeUrl) {
   const baseParts = baseUrl.split('/');
@@ -138,7 +133,6 @@ function urlConstructor(baseUrl, relativeUrl) {
   return `${protocol}//${finalSegments.join('/')}`;
 }
 
-
 async function extractStreamUrl(url) {
   try {
     const html = await fetchHtml(url);
@@ -147,17 +141,19 @@ async function extractStreamUrl(url) {
       console.log(`Failed to extract stream from ${url}`);
       return null;
     }
+
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
     const responseFile = await fetchHtml(`${streamBase}index.m3u8`);
     const streamMatch = responseFile.match(REGEX.streamResolution);
     if (!streamMatch) {
       throw new Error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
     }
+
     const result = urlConstructor(streamBase, streamMatch[2]);
     console.log(`Result: [${result}]`);
     return result;
   } catch (error) {
     console.log('Fetch error:', error);
-    return null;
+    return url;
   }
 }
