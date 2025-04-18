@@ -146,7 +146,8 @@ async function extractStreamUrl(url) {
     const responseFile = await fetchHtml(`${streamBase}index.m3u8`);
     const streamMatch = responseFile.match(REGEX.streamResolution);
     if (!streamMatch) {
-      throw new Error(`Failed to extract stream URL from ${streamBase}index.m3u8`);
+      console.log(`Failed to extract stream URL from ${streamBase}index.m3u8`);
+      return url;
     }
 
     const result = urlConstructor(streamBase, streamMatch[2]);
