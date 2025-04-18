@@ -139,7 +139,7 @@ async function extractStreamUrl(url) {
     const streamHtml = html.match(REGEX.streamData);
     if (!streamHtml) {
       console.log(`Failed to extract stream from ${url}`);
-      return null;
+      return `${streamBase}index.m3u8`;
     }
 
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
