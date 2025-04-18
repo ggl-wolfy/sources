@@ -139,7 +139,7 @@ async function extractStreamUrl(url) {
     const streamHtml = html.match(REGEX.streamData);
     if (!streamHtml) {
       console.log(`Failed to extract stream from ${url}`);
-      return `${streamBase}index.m3u8`;
+      return url;
     }
 
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
@@ -147,7 +147,7 @@ async function extractStreamUrl(url) {
     const streamMatch = responseFile.match(REGEX.streamResolution);
     if (!streamMatch) {
       console.log(`Failed to extract stream URL from ${streamBase}index.m3u8`);
-      return url;
+      return `${streamBase}index.m3u8`;
     }
 
     const result = urlConstructor(streamBase, streamMatch[2]);
