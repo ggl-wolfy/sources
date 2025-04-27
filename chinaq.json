@@ -1,0 +1,17 @@
+{
+    "sourceName": "ChinaQ",
+    "iconUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/chinaq.png",
+    "author": {
+        "name": "GGL",
+        "icon": "https://i.redd.it/snoovatar/avatars/495200d3-4111-4dce-acd3-f69113e08179.png"
+    },
+    "version": "1.0.0",
+    "language": "Chinese",
+    "streamType": "HLS",
+    "quality": "720p",
+    "baseUrl": "https://chinaq.fun/",
+    "searchBaseUrl": "https://chinaq.fun/",
+    "scriptUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/chinaq.js",
+    "asyncJS": true,
+    "softsub": false
+}
