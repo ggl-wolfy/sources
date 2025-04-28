@@ -91,7 +91,7 @@ async function extractEpisodes(url) {
       const [_, pageUrl, episodeNumText] = episodePage;
       const episodeNum = episodeNumText.match(REGEX.episodeNum)?.[1]?.trim() || '0';
 
-      if (!episodeNum) {
+      if (episodeNum == '0') {
         console.log(`Skipped episode: [${episodeNumText}]`);
         continue;
       }
@@ -119,6 +119,16 @@ async function extractEpisodes(url) {
         episodes.push({href, number, title});
       }
     }
+
+    // Sort episodes by number to prevent splitting into seasons
+    episodes.sort(function(a, b) {
+      var keyA = a.number,
+        keyB = b.number;
+      if (keyA < keyB) return -1;
+      if (keyA > keyB) return 1;
+      return 0;
+    });
+
     console.log(episodes);
     return JSON.stringify(episodes);
   } catch (error) {
