@@ -1,17 +1,17 @@
 {
     "sourceName": "GimyTV",
-    "iconUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimy.png",
+    "iconUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimyTV.png",
     "author": {
         "name": "GGL",
         "icon": "https://i.redd.it/snoovatar/avatars/495200d3-4111-4dce-acd3-f69113e08179.png"
     },
-    "version": "1.0.7",
+    "version": "1.0.8",
     "language": "Chinese",
     "streamType": "HLS",
     "quality": "720p",
     "baseUrl": "https://gimy.tv/",
     "searchBaseUrl": "https://gimy.tv/search/-------------.html?wd=%s&submit=",
-    "scriptUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimyTVDev.js",
+    "scriptUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimyTV.js",
     "asyncJS": true,
     "softsub": false
 }
