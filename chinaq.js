@@ -14,8 +14,11 @@ const REGEX = {
 
 async function fetchHtml(url) {
   try {
-    const html = await fetch(url);
-    return await html.text();
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response;
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
@@ -84,10 +87,11 @@ async function extractEpisodes(url) {
 
   try {
     for (const episodePage of episodeSource) {
-      const [_, pageUrl, title] = episodePage;
-      const episodeNum = title.match(REGEX.episodeNum)?.[1]?.trim() || '0';
+      const { href: pageUrl, title } = episodePage.groups || {};
+      const episodeNumMatch = title.match(REGEX.episodeNum);
+      const episodeNum = episodeNumMatch?.groups?.episodeNum?.trim();
 
-      if (episodeNum == '0') {
+      if (!episodeNum || episodeNum === '0') {
         console.log(`Skipped episode: [${title}]`);
         continue;
       }
@@ -117,7 +121,7 @@ async function extractStreamUrl(url) {
     const html = await fetchHtml(`${url}`);
     const sources = JSON.parse(html)?.video_plays;
     const streams = sources.map(source => source.play_data);
-    const result = {streams}
+    const result = { streams };
 
     console.log("Result:", result);
     return JSON.stringify(result);
