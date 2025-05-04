@@ -93,11 +93,10 @@ async function extractEpisodes(url) {
       }
 
       // https://chinaq.fun/tv-cn/202557998/ep1.html ==> https://chinaq.fun/qplays/202557998/ep1
-      const match = pageUrl.match(/\/(\d+)\/ep(\d+)\.html/);
-      const href = `${chinaqBaseUrl}/qplays/${match[1]}/ep${match[2]}`;
+      const episodeUrl = pageUrl.replace(/^\/[^/]+/,'/qplays').replace('.html','');
 
       episodes.unshift({
-        href,
+        href: chinaqBaseUrl + episodeUrl,
         number: parseInt(episodeNum, 10),
         title
       })
@@ -115,7 +114,7 @@ async function extractStreamUrl(url) {
   console.log(`Stream URL: [${url}]`);
 
   try {
- const html = await fetchHtml(url);
+    const html = await fetchHtml(`${url}`);
     const sources = JSON.parse(html)?.video_plays;
     const streams = sources.map(source => source.play_data);
     const result = {streams}
