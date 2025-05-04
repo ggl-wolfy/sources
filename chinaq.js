@@ -14,9 +14,8 @@ const REGEX = {
 
 async function fetchHtml(url) {
   try {
-    return await fetch(url);
-    // const html = await fetch(url);
-    // return await html.text();
+    const html = await fetch(url);
+    return await html.text();
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
@@ -68,10 +67,7 @@ async function extractDetails(url) {
 }
 
 async function extractEpisodes(url) {
-  const episodes = [];
-
-  let sourceDict = {};
-  let sourceNum = 1;
+  let episodes = [];
   let episodeSource;
 
   try {
@@ -88,46 +84,24 @@ async function extractEpisodes(url) {
 
   try {
     for (const episodePage of episodeSource) {
-      const [_, pageUrl, episodeNumText] = episodePage;
-      const episodeNum = episodeNumText.match(REGEX.episodeNum)?.[1]?.trim() || '0';
+      const [_, pageUrl, title] = episodePage;
+      const episodeNum = title.match(REGEX.episodeNum)?.[1]?.trim() || '0';
 
       if (episodeNum == '0') {
-        console.log(`Skipped episode: [${episodeNumText}]`);
+        console.log(`Skipped episode: [${title}]`);
         continue;
       }
 
       // https://chinaq.fun/tv-cn/202557998/ep1.html ==> https://chinaq.fun/qplays/202557998/ep1
-      const splitUrl = pageUrl.split('/');
-      const splitFiltered = splitUrl.filter(item => item !== splitUrl[1]);
-      const jsonUrl = splitFiltered.join('/').replace('.html', '');
-      // console.log(`Accessing page ${chinaqBaseUrl + '/qplays' + jsonUrl}`);
-      const pageHtml = await fetchHtml(chinaqBaseUrl + '/qplays' + jsonUrl);
+      const match = pageUrl.match(/\/(\d+)\/ep(\d+)\.html/);
+      const href = `${chinaqBaseUrl}/qplays/${match[1]}/ep${match[2]}`;
 
-      const sourcesMatch = JSON.parse(pageHtml)?.video_plays;
-      for (const source of sourcesMatch) {
-        const sourceName = source.src_site
-        const href = source.play_data
-        // console.log(`Source name: ${sourceName}, href: ${href}`)
-
-        if (!sourceDict[sourceName]) {
-          sourceDict[sourceName] = sourceNum * 100;
-          sourceNum++;
-        }
-
-        const number = sourceDict[sourceName] + parseInt(episodeNum, 10);
-        const title = `[${sourceName}] ${episodeNumText}`;
-        episodes.push({href, number, title});
-      }
+      episodes.unshift({
+        href,
+        number: parseInt(episodeNum, 10),
+        title
+      })
     }
-
-    // Sort episodes by number to prevent splitting into seasons
-    episodes.sort(function(a, b) {
-      var keyA = a.number,
-        keyB = b.number;
-      if (keyA < keyB) return -1;
-      if (keyA > keyB) return 1;
-      return 0;
-    });
 
     console.log(episodes);
     return JSON.stringify(episodes);
@@ -139,11 +113,17 @@ async function extractEpisodes(url) {
 
 async function extractStreamUrl(url) {
   console.log(`Stream URL: [${url}]`);
-  return url;
-}
 
-// searchResults('https://chinaq.fun/tv-cn/202557998/')
-// extractDetails('https://chinaq.fun/tv-cn/202557998/')
-// extractEpisodes('https://chinaq.fun/tv-cn/202557998/')
-// extractStreamUrl('https://gimy.tv/ep-110414-8-1.html')
-// extractStreamUrl('https://gimy.tv/ep-179316-5-5.html')
+  try {
+ const html = await fetchHtml(url);
+    const sources = JSON.parse(html)?.video_plays;
+    const streams = sources.map(source => source.play_data);
+    const result = {streams}
+
+    console.log("Result:", result);
+    return JSON.stringify(result);
+  } catch (error) {
+    console.log('Fetch error in extractStreamUrl:', error);
+    return null;
+  }
+}
