@@ -2,7 +2,7 @@
 const chinaqBaseUrl = "https://chinaq.fun";
 
 const REGEX = {
-  detailsAirDate: /<div class="description[\s\S]*?【首播】(\d{4}-\d{2}-\d{2})/,
+  detailsAirDate: /【首播】(\d{4}-\d{2}-\d{2})/,
   detailsDesc: /<div id="summary">([\s\S]*?)<br/,
   episodeNum: /第(\d+)集/,
   episodePage: /<h2><a href="([^"]+)">([\s\S]*?)<\/a>/g,
@@ -14,7 +14,6 @@ const REGEX = {
 
 async function fetchHtml(url) {
   try {
-    console.log(`Debug: trying to fetch ${url}`);
     return await fetch(url);
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
@@ -58,7 +57,7 @@ async function extractDetails(url) {
     const description = extractMatches(html, REGEX.detailsDesc) || 'Error loading description';
     const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
-    // console.log(JSON.stringify(details));
+    console.log(JSON.stringify(details));
     return JSON.stringify(details);
   } catch (error) {
     console.log('Details error:', error);
@@ -84,20 +83,18 @@ async function extractEpisodes(url) {
 
   try {
     for (const episodePage of episodeSource) {
-      const { href: pageUrl, title } = episodePage.groups || {};
+      const [_, pageUrl, title] = episodePage;
       const episodeNumMatch = title.match(REGEX.episodeNum);
-      const episodeNum = episodeNumMatch?.groups?.episodeNum?.trim();
-
-      if (!episodeNum || episodeNum === '0') {
+      const episodeNum = episodeNumMatch?.[1]?.trim() || '0';
+      if (!episodeNumMatch || episodeNum === '0') {
         console.log(`Skipped episode: [${title}]`);
         continue;
       }
-
       // https://chinaq.fun/tv-cn/202557998/ep1.html ==> https://chinaq.fun/qplays/202557998/ep1
-      const episodeUrl = pageUrl.replace(/^\/[^/]+/,'/qplays').replace('.html','');
+      const href = pageUrl.replace(/^\/[^/]+/,'/qplays').replace('.html','');
 
       episodes.unshift({
-        href: chinaqBaseUrl + episodeUrl,
+        href,
         number: parseInt(episodeNum, 10),
         title
       })
@@ -112,10 +109,11 @@ async function extractEpisodes(url) {
 }
 
 async function extractStreamUrl(url) {
-  console.log(`Stream URL: [${url}]`);
+  const episodeUrl = chinaqBaseUrl + url;
+  console.log(`Stream URL: [${episodeUrl}]`);
 
   try {
-    const html = await fetchHtml(`${url}`);
+    const html = await fetchHtml(episodeUrl);
     const sources = JSON.parse(html)?.video_plays;
     const streams = sources.map(source => source.play_data);
     const result = { streams };
