@@ -15,11 +15,7 @@ const REGEX = {
 async function fetchHtml(url) {
   try {
     console.log(`Debug: trying to fetch ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response;
+    return await fetch(url);
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
