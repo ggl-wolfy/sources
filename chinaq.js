@@ -6,48 +6,51 @@ const REGEX = {
   detailsDesc: /<div id="summary">([\s\S]*?)<br/,
   episodeNum: /第(\d+)集/,
   episodePage: /<h2><a href="([^"]+)">([\s\S]*?)<\/a>/g,
-  episodePageSource: /<small>([^<]*?)<\/small>[\s\S]*?play_data="([^"]+)"/g,
   episodeSources: /id="all-ep"([\s\S]*?)<\/ul>/,
   searchItemImg: /<div class="description[\s\S]*?img src="([^"]+)"/,
-  searchItemTitle: /<h1>([\s\S]*?) ChinaQ線上看/,
+  searchItemTitle: /<h1>([\s\S]*?) (?:ChinaQ)?線上看/,
 };
+
+async function getHostWithProtocol(url) {
+  // Match the protocol and host part of the URL
+  const match = url.match(/^(https:\/\/(?:[^\/]+\.)?chinaq[^\/]+)/i);
+  if (match) return match[1]
+  throw new Error(`Invalid ChinaQ URL: ${url}`)
+}
 
 async function fetchHtml(url) {
   try {
-    return await fetch(url);
+    const response = await fetch(url);
+    return await response.text();
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
   }
 }
 
-function extractMatches(html, regex, matchAll = false) {
-  if (matchAll) {
-    return html.matchAll(regex)
-  }
-
-  const result = html.match(regex)
-  // console.log(`regex: ${regex}, result: ${result[1]}`)
-  return result ? result[1]?.trim() : null;
+function extractMatches(html, regex) {
+  const result = html.match(regex);
+  return result?.[1]?.trim() ?? null;
 }
 
 async function searchResults(keyword) {
-  const results = [];
   try {
     const html = await fetchHtml(keyword);
-
     const href = keyword;
     const title = extractMatches(html, REGEX.searchItemTitle);
     const image = extractMatches(html, REGEX.searchItemImg);
 
+    const results = [];
     if (href && title && image) {
-      results.push({ title, image: chinaqBaseUrl + image, href });
+      const baseUrl = getHostWithProtocol(keyword);
+      results.push({ title, image: baseUrl + image, href });
     }
+
     // console.log(JSON.stringify(results));
     return JSON.stringify(results);
   } catch (error) {
-    console.log('Search error:', error);
-    return JSON.stringify([{ title: 'Error', image: null, href: null }]);
+    console.log(`Failed to extract series from URL: ${keyword}`);
+    return JSON.stringify([]);
   }
 }
 
@@ -57,17 +60,17 @@ async function extractDetails(url) {
     const description = extractMatches(html, REGEX.detailsDesc) || 'Error loading description';
     const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
+
     console.log(JSON.stringify(details));
     return JSON.stringify(details);
   } catch (error) {
-    console.log('Details error:', error);
+    console.log('Failed to extract details:', error);
     return JSON.stringify([{ description: 'Error loading description', aliases: 'Aliases: N/A', airdate: 'Aired: Unknown' }]);
   }
 }
 
 async function extractEpisodes(url) {
-  let episodes = [];
-  let episodeSource;
+  const episodes = [];
 
   try {
     const html = await fetchHtml(url);
@@ -75,53 +78,42 @@ async function extractEpisodes(url) {
     if (!sourcesMatch) throw new Error('Failed to extract source');
 
     const sourcesHtml = sourcesMatch[1];
-    episodeSource = extractMatches(sourcesHtml, REGEX.episodePage, matchAll = true);
-  } catch (error) {
-    console.log('Episode error [1]:', error);
-    return JSON.stringify([]);
-  }
+    const episodeSource = sourcesHtml.matchAll(REGEX.episodePage);
+    for (const [_, pageUrl, title] of episodeSource) {
+      const episodeNum = extractMatches(title, REGEX.episodeNum) ?? '0'
+      const number = parseInt(episodeNum, 10);
 
-  try {
-    for (const episodePage of episodeSource) {
-      const [_, pageUrl, title] = episodePage;
-      const episodeNumMatch = title.match(REGEX.episodeNum);
-      const episodeNum = episodeNumMatch?.[1]?.trim() || '0';
-      if (!episodeNumMatch || episodeNum === '0') {
+      if (number === 0) {
         console.log(`Skipped episode: [${title}]`);
         continue;
       }
+
       // https://chinaq.fun/tv-cn/202557998/ep1.html ==> https://chinaq.fun/qplays/202557998/ep1
       const href = pageUrl.replace(/^\/[^/]+/,'/qplays').replace('.html','');
 
-      episodes.unshift({
-        href,
-        number: parseInt(episodeNum, 10),
-        title
-      })
+      episodes.unshift({ href, number, title });
     }
 
     console.log(episodes);
     return JSON.stringify(episodes);
   } catch (error) {
-    console.log('Episode error [2]:', error);
+    console.log('Failed to extract episodes:', error);
     return JSON.stringify([]);
   }
 }
 
 async function extractStreamUrl(url) {
-  const episodeUrl = chinaqBaseUrl + url;
-  console.log(`Stream URL: [${episodeUrl}]`);
+  console.log(`Stream URL: [${url}]`);
 
   try {
-    const html = await fetchHtml(episodeUrl);
+    const html = await fetchHtml(url);
     const sources = JSON.parse(html)?.video_plays;
-    const streams = sources.map(source => source.play_data);
-    const result = { streams };
+    const result = { streams: sources.map(source => source.play_data) };
 
     console.log("Result:", result);
     return JSON.stringify(result);
   } catch (error) {
-    console.log('Fetch error in extractStreamUrl:', error);
+    console.log('Failed to extract streams:', error);
     return null;
   }
 }
