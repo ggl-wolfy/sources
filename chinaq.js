@@ -20,8 +20,7 @@ async function getHostWithProtocol(url) {
 
 async function fetchHtml(url) {
   try {
-    const response = await fetch(url);
-    return await response.text();
+    return await fetch(url);
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
