@@ -3,7 +3,7 @@ const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
   detailsAirDate: /年份：<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
-  detailsDesc: /<div[^>]*content">[\s\S]*?<p>([\s\S]*?)<\/p>/,
+  detailsDesc: /<div[^>]*content">[\s\S]*?<p>(?:<[^>]+>)?([\s\S]*?)<\//,
   episodeData: /<a class="btn[^>]*href="([^"]*)">([\s\S]*?)<\/a>/g,
   episodeNum: /第(\d+)集/,
   episodeSource: /<div class="myui-panel myui[^>]*([\s\S]*?<\/ul>)/g,
@@ -28,11 +28,11 @@ async function fetchHtml(url) {
 
 function extractMatches(html, regex, matchAll = false) {
   if (matchAll) {
-    return html.matchAll(regex)
+    return html.matchAll(regex);
+  } else {
+    const result = html.match(regex);
+    return result ? result[1]?.trim() : null;
   }
-
-  const result = html.match(regex)
-  return result ? result[1]?.trim() : null;
 }
 
 async function searchResults(keyword) {
@@ -63,14 +63,14 @@ async function searchResults(keyword) {
 async function extractDetails(url) {
   try {
     const html = await fetchHtml(url);
-    const description = extractMatches(html, REGEX.detailsDesc) || 'Error loading description';
-    const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired: Unknown';
+    const description = extractMatches(html, REGEX.detailsDesc) || 'No description available';
+    const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired/Released: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
     // console.log(JSON.stringify(details));
     return JSON.stringify(details);
   } catch (error) {
     console.log('Details error:', error);
-    return JSON.stringify([{ description: 'Error loading description', aliases: 'Aliases: N/A', airdate: 'Aired: Unknown' }]);
+    return JSON.stringify([{ description: 'Error loading description', aliases: 'Aliases: N/A', airdate: 'Aired/Released: Unknown' }]);
   }
 }
 
@@ -99,8 +99,8 @@ async function extractEpisodes(url) {
 
       for (const episodeMatch of episodesMatch) {
         const href = gimyBaseUrl + episodeMatch[1].trim();
-        const episodeNumText = episodeMatch[2].match(REGEX.episodeNum);
-        const episodeNum = episodeNumText ? episodeNumText[1].trim() : '0';
+        const episodeNumText = episodeMatch[2];
+        const episodeNum = episodeNumText.match(REGEX.episodeNum)?.[1]?.trim() || '0';
         const number = count + parseInt(episodeNum, 10);
 
         if (number <= previousEpisodeCount) {
@@ -114,7 +114,7 @@ async function extractEpisodes(url) {
       count += 100;
     }
 
-    // console.log(JSON.stringify(episodes));
+    console.log(episodes);
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
@@ -139,7 +139,7 @@ async function extractStreamUrl(url) {
     const streamHtml = html.match(REGEX.streamData);
     if (!streamHtml) {
       console.log(`Failed to extract stream from ${url}`);
-      return url;
+      return null;
     }
 
     const streamBase = streamHtml[1].replace(/(?:\\(.))/g, '$1');
