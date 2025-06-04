@@ -2,6 +2,8 @@
 const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
+  detailsAirDate: /module-info-tag[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
+  detailsDesc: /introduction-content">[\s]+?<p>([\s\S]*?)</,
   episodeData: /<a[^>]*href="([^"]*)"(?:[\s\S]*?)<span>([\s\S]*?)<\/span>/g,
   episodeNum: /第(\d+)集/,
   episodeSource: /id="panel1">([\s\S]*?)<div class="module-list/g,
