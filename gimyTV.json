@@ -5,12 +5,12 @@
         "name": "GGL",
         "icon": "https://i.redd.it/snoovatar/avatars/495200d3-4111-4dce-acd3-f69113e08179.png"
     },
-    "version": "1.0.8",
+    "version": "1.0.9",
     "language": "Chinese",
     "streamType": "HLS",
     "quality": "720p",
     "baseUrl": "https://gimy.tv/",
-    "searchBaseUrl": "https://gimy.tv/search/-------------.html?wd=%s&submit=",
+    "searchBaseUrl": "https://gimy.tv/search/-------------.html?wd=%s",
     "scriptUrl": "https://raw.githubusercontent.com/ggl-wolfy/sources/refs/heads/main/gimyTV.js",
     "asyncJS": true,
     "softsub": false
