@@ -2,17 +2,13 @@
 const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
-  detailsAirDate: /年份：<\/span>[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
-  detailsDesc: /<div[^>]*content">[\s\S]*?<p>(?:<[^>]+>)?([\s\S]*?)<\//,
-  episodeData: /<a class="btn[^>]*href="([^"]*)">([\s\S]*?)<\/a>/g,
+  episodeData: /<a[^>]*href="([^"]*)"(?:[\s\S]*?)<span>([\s\S]*?)<\/span>/g,
   episodeNum: /第(\d+)集/,
-  episodeSource: /<div class="myui-panel myui[^>]*([\s\S]*?<\/ul>)/g,
-  episodeSourceName: /<h3 class="title">([\s\S]*?)<\/h3>/,
-  episodeSources: /col-md-wide-7[^>]*>([\s\S]*?)id="desc"/,
-  searchItemImg: /<a class="myui-vodlist__thumb[\s\S]*?data-original="([^"]+)"/,
-  searchItemTitle: /<h4 class="title"><a[^>]*>([\s\S]*?)<\/a>/,
-  searchItemUrl: /<a class="myui-vodlist__thumb[\s\S]*?href="([^"]+)"/,
-  searchList: /<li class="clearfix">([\s\S]*?)<\/li>/g,
+  episodeSource: /id="panel1">([\s\S]*?)<div class="module-list/g,
+  searchItemImg: /data-original="([^"]+)"/,
+  searchItemTitle: /<strong>([\s\S]*?)<\/strong>/,
+  searchItemUrl: /<a href="([^"]+)"/,
+  searchList: /"module-card-item-class"([\s\S]*?)"module-card-item-footer"/g,
   streamData: /player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/,
   streamResolution: /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/
 };
@@ -78,16 +74,12 @@ async function extractEpisodes(url) {
   const episodes = [];
   try {
     const html = await fetchHtml(url);
-    const sourcesMatch = html.match(REGEX.episodeSources);
-    if (!sourcesMatch) throw new Error('Failed to extract source');
-
-    const sourcesHtml = sourcesMatch[1];
-    const sourceMatch = extractMatches(sourcesHtml, REGEX.episodeSource, matchAll = true);
+    const sourceMatch = extractMatches(html, REGEX.episodeSource, matchAll = true);
 
     let count = 100;
     for (const source of sourceMatch) {
       const sourceHtml = source[1];
-      const sourceName = extractMatches(sourceHtml, REGEX.episodeSourceName)?.trim() || 'Unknown Source';
+      const sourceName = count;
       const episodesMatch = extractMatches(sourceHtml, REGEX.episodeData, matchAll = true);
 
       if (!episodesMatch) {
