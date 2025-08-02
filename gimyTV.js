@@ -2,15 +2,13 @@
 const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
-  detailsAirDate: /module-info-tag[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
-  detailsDesc: /introduction-content">[\s]+?<p>([\s\S]*?)</,
-  episodeData: /<a[^>]*href="([^"]*)"(?:[\s\S]*?)<span>([\s\S]*?)<\/span>/g,
+  detailsAirDate: /<span class[\s\S]*?年份：[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
+  detailsDesc: / content">[\s]+?<p>(?:<span[^>]+?>)?([\s\S]*?)<\//,
+  episodeData: /<a[^>]*href="([^"]*)">([\s\S]*?)<\/a>/g,
   episodeNum: /第(\d+)集/,
-  episodeSource: /id="panel1">([\s\S]*?)<div class="module-list/g,
-  searchItemImg: /data-original="([^"]+)"/,
-  searchItemTitle: /<strong>([\s\S]*?)<\/strong>/,
-  searchItemUrl: /<a href="([^"]+)"/,
-  searchList: /"module-card-item-class"([\s\S]*?)"module-card-item-footer"/g,
+  episodeSource: /ul class="myui-content__list([\s\S]*?)<\/ul/g,
+  searchItem: /href="([^"]+)" title="([^"]+)" data-original="([^"]+)"/,
+  searchList: /class="clearfix"([\s\S]*?)<\/li/g,
   streamData: /player_data=[\s\S]*?"url":"([^"]*)index.m3u8"/,
   streamResolution: /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+x\d+)[\r\n]+([^\r\n]+)/
 };
@@ -18,6 +16,8 @@ const REGEX = {
 async function fetchHtml(url) {
   try {
     return await fetch(url);
+    // const html = await fetch(url);
+    // return await html.text();
   } catch (error) {
     console.log(`Failed to fetch ${url}`);
     throw error;
@@ -36,20 +36,19 @@ function extractMatches(html, regex, matchAll = false) {
 async function searchResults(keyword) {
   const results = [];
   try {
-    const url = `${gimyBaseUrl}/search/-------------.html?wd=${keyword}&submit=`;
+    const url = `${gimyBaseUrl}/search/-------------.html?wd=${keyword}`;
     const html = await fetchHtml(url);
     const items = extractMatches(html, REGEX.searchList, matchAll = true);
 
     for (const item of items) {
       const itemHtml = item[1];
-      const href = extractMatches(itemHtml, REGEX.searchItemUrl);
-      const title = extractMatches(itemHtml, REGEX.searchItemTitle);
-      const image = extractMatches(itemHtml, REGEX.searchItemImg);
+      const [_, href, title, image] = itemHtml.match(REGEX.searchItem);
 
       if (href && title && image) {
         results.push({ title, image, href: gimyBaseUrl + href });
       }
     }
+
     // console.log(JSON.stringify(results));
     return JSON.stringify(results);
   } catch (error) {
@@ -64,6 +63,7 @@ async function extractDetails(url) {
     const description = extractMatches(html, REGEX.detailsDesc) || 'No description available';
     const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired/Released: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
+
     // console.log(JSON.stringify(details));
     return JSON.stringify(details);
   } catch (error) {
@@ -108,7 +108,7 @@ async function extractEpisodes(url) {
       count += 100;
     }
 
-    console.log(episodes);
+    // console.log(episodes);
     return JSON.stringify(episodes);
   } catch (error) {
     console.log('Episode error:', error);
@@ -145,7 +145,7 @@ async function extractStreamUrl(url) {
     }
 
     const result = urlConstructor(streamBase, streamMatch[2]);
-    console.log(`Result: [${result}]`);
+    // console.log(`Result: [${result}]`);
     return result;
   } catch (error) {
     console.log('Fetch error:', error);
