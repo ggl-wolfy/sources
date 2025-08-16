@@ -3,7 +3,7 @@ const gimyBaseUrl = "https://gimy.tv";
 
 const REGEX = {
   detailsAirDate: /<span class[\s\S]*?年份：[\s\S]*?<a[^>]*>([^<]+)<\/a>/,
-  detailsDesc: / content">[\s]+?<p>(?:<span[^>]+?>)?([\s\S]*?)<\//,
+  detailsDesc: / content">[\s]+?<p>(?:<span[^>]+?>)?([\s\S]*?)<\/div/,
   episodeData: /<a[^>]*href="([^"]*)">([\s\S]*?)<\/a>/g,
   episodeNum: /第(\d+)集/,
   episodeSource: /ul class="myui-content__list([\s\S]*?)<\/ul/g,
@@ -60,7 +60,8 @@ async function searchResults(keyword) {
 async function extractDetails(url) {
   try {
     const html = await fetchHtml(url);
-    const description = extractMatches(html, REGEX.detailsDesc) || 'No description available';
+    const description_all = extractMatches(html, REGEX.detailsDesc) || 'No description available';
+    const description = description_all.replace(/&nbsp; ?/g, '').replace(/<\/?[a-z]+>/g, '')
     const airdate = extractMatches(html, REGEX.detailsAirDate) || 'Aired/Released: Unknown';
     const details = [{ description, alias: 'N/A', airdate }];
 
